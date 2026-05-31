@@ -8,25 +8,20 @@ module MemorySystem #(
     input  wire [ADDR_WIDTH-1:0] ADDR,
     input  wire [31:0] WD,
     output wire [31:0] RD,
-    // SPI pins - connect directly to top-level ports
     output wire        ACL_SCLK,
     output wire        ACL_MOSI,
     input  wire        ACL_MISO,
     output wire        ACL_CSN
 );
-    wire        ram_we, spi_we, spi_sel;
-    wire [31:0] ram_rd, spi_rd;
 
-    // ── Address decode ──────────────────────────────────────────────
-    Addr_Decoder dec (
-        .ADDR    (ADDR),
-        .WE      (WE),
-        .ram_we  (ram_we),
-        .spi_we  (spi_we),
-        .spi_sel (spi_sel)
-    );
+    // ── Address decode ───────────────────────────────────────────────────
+    // SPI peripheral occupies 0x400-0x40F (16 bytes)
+    wire spi_sel = (ADDR[31:4] == 28'h0000040);   // ADDR[31:4] == 0x0000040
+    wire ram_we  = WE & ~spi_sel;
+    wire spi_we  = WE &  spi_sel;
 
-    // ── Data memory ─────────────────────────────────────────────────
+    // ── Data RAM ─────────────────────────────────────────────────────────
+    wire [31:0] ram_rd;
     Memory #(.DEPTH(DEPTH), .ADDR_WIDTH(ADDR_WIDTH)) Data_mem (
         .clk    (clk),
         .WE     (ram_we),
@@ -36,12 +31,13 @@ module MemorySystem #(
         .RD     (ram_rd)
     );
 
-    // ── SPI peripheral ──────────────────────────────────────────────
+    // ── SPI peripheral ───────────────────────────────────────────────────
+    wire [31:0] spi_rd;
     SPI_Peripheral spi (
         .clk      (clk),
         .rst      (rst),
         .we       (spi_we),
-        .addr     (ADDR[2:0]),   // byte offset within peripheral space
+        .addr     (ADDR[3:0]),   // 4-bit offset covers 0x0..0xF
         .wdata    (WD),
         .rdata    (spi_rd),
         .ACL_SCLK (ACL_SCLK),
@@ -50,12 +46,7 @@ module MemorySystem #(
         .ACL_CSN  (ACL_CSN)
     );
 
-    // ── ReadData mux ────────────────────────────────────────────────
-    Mux_2to1 #(.WIDTH(32)) RD_Mux (
-        .select       (spi_sel),
-        .input_0      (ram_rd),
-        .input_1      (spi_rd),
-        .output_value (RD)
-    );
+    // ── ReadData mux ─────────────────────────────────────────────────────
+    assign RD = spi_sel ? spi_rd : ram_rd;
 
 endmodule
