@@ -1,0 +1,26 @@
+#-----------------------------------------------------------
+# Vivado v2024.1 (64-bit)
+# SW Build 5076996 on Wed May 22 18:37:14 MDT 2024
+# IP Build 5075265 on Wed May 22 21:45:21 MDT 2024
+# SharedData Build 5076995 on Wed May 22 18:29:18 MDT 2024
+# Start of session at: Sun May 31 13:31:20 2026
+# Process ID: 20296
+# Current directory: C:/Users/ernka/Documents/GitHub/SingleCycleRISC-V-/RISC-V
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent14712 C:\Users\ernka\Documents\GitHub\SingleCycleRISC-V-\RISC-V\RISC-V.xpr
+# Log file: C:/Users/ernka/Documents/GitHub/SingleCycleRISC-V-/RISC-V/vivado.log
+# Journal file: C:/Users/ernka/Documents/GitHub/SingleCycleRISC-V-/RISC-V\vivado.jou
+# Running On        :eren
+# Platform          :Windows Server 2016 or Windows 10
+# Operating System  :26200
+# Processor Detail  :AMD Ryzen 7 7730U with Radeon Graphics         
+# CPU Frequency     :1996 MHz
+# CPU Physical cores:8
+# CPU Logical cores :16
+# Host memory       :16474 MB
+# Swap memory       :7784 MB
+# Total Virtual     :24259 MB
+# Available Virtual :12382 MB
+#-----------------------------------------------------------
+start_gui
+open_project C:/Users/ernka/Documents/GitHub/SingleCycleRISC-V-/RISC-V/RISC-V.xpr
+update_compile_order -fileset sources_1

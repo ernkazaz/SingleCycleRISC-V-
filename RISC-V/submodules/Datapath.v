@@ -7,6 +7,10 @@ module Datapath(
     input [2:0] ImmSrc,
     input [3:0] ALUControl,
     input [4:0] Debug_Source_select, 
+    input SPI_MISO,
+    output SPI_SCLK,
+    output SPI_MOSI,
+    output SPI_CS,
     output Zero, Negative, Carry, Overflow,
     output [31:0] PC, Instr, Debug_out
     );
@@ -86,14 +90,20 @@ module Datapath(
         .Result(ALUResult)
     );
     
-    Memory #(.DEPTH(256), .ADDR_WIDTH(32)) Data_mem (
-        .clk(clk),
-        .WE(MemWrite),
-        .funct3(Instr[14:12]),
-        .ADDR(ALUResult),
-        .WD(RD2),
-        .RD(ReadData)
+    MemorySystem #(.DEPTH(256), .ADDR_WIDTH(32)) Mem_sys (
+        .clk      (clk),
+        .rst      (rst),
+        .WE       (MemWrite),
+        .funct3   (Instr[14:12]),
+        .ADDR     (ALUResult),
+        .WD       (RD2),
+        .RD       (ReadData),
+        .ACL_SCLK (ACL_SCLK),
+        .ACL_MOSI (ACL_MOSI),
+        .ACL_MISO (ACL_MISO),
+        .ACL_CSN  (ACL_CSN)
     );
+    
     
     Mux_4to1 #(.WIDTH(32)) Result_Mux (
         .select(ResultSrc),

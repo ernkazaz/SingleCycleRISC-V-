@@ -48,6 +48,7 @@ module Controller(
     // Instantiate the PC Logic Block
     PC_Logic pc_log (
         .Branch(Branch),
+        .funct3(funct3),
         .Zero(Zero),
         .Negative(Negative),
         .Carry(Carry),
