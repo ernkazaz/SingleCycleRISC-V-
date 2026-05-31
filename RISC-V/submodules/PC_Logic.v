@@ -1,17 +1,27 @@
 module PC_Logic(
-    input  wire       Branch,
-    input  wire       Zero,
-    input  wire [1:0] Jump,
-    output wire [1:0] PCSrc
+    input      Branch,
+    input      Zero, Negative, Carry, Overflow,
+    input [2:0] funct3,
+    input [1:0] Jump,
+    output reg [1:0] PCSrc
 );
+    reg BranchTaken;
+    always @(*) begin
+        case(funct3)
+            3'b000: BranchTaken = Zero;                    // BEQ
+            3'b001: BranchTaken = ~Zero;                   // BNE
+            3'b100: BranchTaken = Negative ^ Overflow;     // BLT
+            3'b101: BranchTaken = ~(Negative ^ Overflow);  // BGE
+            3'b110: BranchTaken = ~Carry;                  // BLTU
+            3'b111: BranchTaken = Carry;                   // BGEU
+            default: BranchTaken = 1'b0;
+        endcase
+    end
 
-    // PCSrc mapping for your Datapath's Mux_4to1:
-    // 2'b00: PCPlus4
-    // 2'b01: PCTarget (Used for Branches and JAL)
-    // 2'b10: ALUResult (Used exclusively for JALR)
-
-    assign PCSrc = (Jump == 2'b10)                   ? 2'b10 : // JALR takes priority
-                   (Jump == 2'b01 || (Branch & Zero)) ? 2'b01 : // JAL or Successful BEQ
-                                                       2'b00;  // Default path
-                                                       
+    always @(*) begin
+        if      (Jump == 2'b01)           PCSrc = 2'b01; // JAL  → PCTarget
+        else if (Jump == 2'b10)           PCSrc = 2'b10; // JALR → ALUResult
+        else if (Branch && BranchTaken)   PCSrc = 2'b01; // branch taken → PCTarget
+        else                              PCSrc = 2'b00; // PC+4
+    end
 endmodule

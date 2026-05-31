@@ -7,7 +7,7 @@ module Datapath(
     input [2:0] ImmSrc,
     input [3:0] ALUControl,
     input [4:0] Debug_Source_select, 
-    output Zero,
+    output Zero, Negative, Carry, Overflow,
     output [31:0] PC, Instr, Debug_out
     );
     
@@ -80,12 +80,16 @@ module Datapath(
         .B(SrcB),
         .ALUControl(ALUControl),
         .Zero(Zero),
+        .Negative(Negative),
+        .Carry(Carry),
+        .Overflow(Overflow),
         .Result(ALUResult)
     );
     
-    Memory #(.BYTE_SIZE(4), .ADDR_WIDTH(32)) Data_mem (
+    Memory #(.DEPTH(256), .ADDR_WIDTH(32)) Data_mem (
         .clk(clk),
         .WE(MemWrite),
+        .funct3(Instr[14:12]),
         .ADDR(ALUResult),
         .WD(RD2),
         .RD(ReadData)

@@ -2,7 +2,7 @@
 
 module Controller(
     input  wire [31:0] Instr,
-    input  wire        Zero,
+    input  wire        Zero, Negative, Carry, Overflow,
     output wire [1:0]  PCSrc,
     output wire [1:0]  ResultSrc,
     output wire        MemWrite,
@@ -49,6 +49,9 @@ module Controller(
     PC_Logic pc_log (
         .Branch(Branch),
         .Zero(Zero),
+        .Negative(Negative),
+        .Carry(Carry),
+        .Overflow(Overflow),
         .Jump(Jump),
         .PCSrc(PCSrc)
     );
