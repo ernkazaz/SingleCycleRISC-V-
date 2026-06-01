@@ -35,5 +35,5 @@ module ALU(
     assign Zero     = (ResultReg == 32'b0);
     assign Negative = ResultReg[31];
     assign Carry    = Sum[32];                         // only meaningful for ADD/SUB
-    assign Overflow = A[31] ^ temp[31] ^ Sum[31] ^ ALUControl[0];
+    assign Overflow = (~(A[31] ^ temp[31])) & (A[31] ^ Sum[31]);
 endmodule

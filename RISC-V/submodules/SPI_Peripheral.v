@@ -1,12 +1,13 @@
 // SPI_Peripheral - memory-mapped SPI master
 // Address map (offset from 0x400, using ADDR[3:0]):
-//   0x0 (offset 0) : TX_Data   [31:0]  - SW
-//   0x4 (offset 4) : TX_Length [7:0]   - SB
-//   0x5 (offset 5) : RX_Length [7:0]   - SB
-//   0x6 (offset 6) : X_Start   (write) - SB  (starts transaction)
-//   0x8 (offset 8) : RX_Data   [31:0]  - LW
+//   0x0 (offset 0)  : TX_Data   [31:0]  - SW
+//   0x4 (offset 4)  : TX_Length [7:0]   - SB
+//   0x5 (offset 5)  : RX_Length [7:0]   - SB
+//   0x6 (offset 6)  : X_Start   (write) - SB  (starts transaction)
+//   0x8 (offset 8)  : RX_Data   [31:0]  - LW
+//   0xC (offset 12) : Status    [31:0]  - LW  (bit 0 is the busy flag)
 //
-// NOTE: Memory_System must pass ADDR[3:0] (not [2:0]) to cover offset 8.
+// NOTE: Memory_System must pass ADDR[3:0] to cover offset 8 and 12.
 
 module SPI_Peripheral (
     input  wire        clk,
@@ -27,6 +28,7 @@ module SPI_Peripheral (
     reg [7:0]  tx_len_reg;
     reg [7:0]  rx_len_reg;
     reg [31:0] rx_data_reg;
+    reg        spi_busy;        // Hardware busy tracking status register
 
     // X_Start: one-cycle pulse when offset 6 is written
     wire start_pulse = we && (addr == 4'd6);
@@ -48,6 +50,17 @@ module SPI_Peripheral (
         end
     end
 
+    // Hardware busy flag control logic
+    always @(posedge clk) begin
+        if (rst) begin
+            spi_busy <= 1'b0;
+        end else if (start_pulse) begin
+            spi_busy <= 1'b1;   // Go busy immediately when transaction starts
+        end else if (fsm_done) begin
+            spi_busy <= 1'b0;   // Clear busy when FSM completes operation
+        end
+    end
+
     // Capture RX data when FSM signals done
     wire        fsm_done;
     wire [31:0] fsm_rx_data;
@@ -66,6 +79,7 @@ module SPI_Peripheral (
             4'd4:    rdata = {24'b0, tx_len_reg};
             4'd5:    rdata = {24'b0, rx_len_reg};
             4'd8:    rdata = rx_data_reg;           // LW <- 0x408
+            4'd12:   rdata = {31'b0, spi_busy};     // LW <- 0x40C (Expose bit 0 to CPU)
             default: rdata = 32'b0;
         endcase
     end
