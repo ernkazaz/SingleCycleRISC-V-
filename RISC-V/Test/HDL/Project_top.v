@@ -5,7 +5,7 @@
 // Board connections:
 //   CLK100MHZ  → system clock (used for processor and MSSD)
 //   BTND       → synchronous reset  (debounced)
-//   SW[4:0]    → register file debug port select (5 bits for x0-x31)
+//   SW[4:0]    → register file debug port select
 //   7-seg      → upper byte shows PC[7:0], lower 3 bytes show debug register
 //   ACL_*      → on-board ADXL362 SPI accelerometer pins
 
@@ -32,7 +32,7 @@ module Project_top (
     output wire        ACL_CSN
 );
 
-    // ── Debounced buttons ─────────────────────────────────────────────────
+    // Debounced buttons
     wire [4:0] buttons;
     debouncer debouncer_0 (
         .clk     (CLK100MHZ),
@@ -44,14 +44,14 @@ module Project_top (
 
     wire rst = buttons[0];   // BTND = reset
 
-    // ── Debug wires ───────────────────────────────────────────────────────
+    // Debug wires
     wire [31:0] debug_reg_out;
     wire [31:0] PC;
 
-    // ── Mirror switches to LEDs (handy for seeing debug select) ──────────
+    // Mirror switches to LEDs (handy for seeing debug select)
     assign LED = SW;
 
-    // ── 7-Segment display ─────────────────────────────────────────────────
+    // 7-Segment display
     // Upper 8 bits  = PC[7:0]   (leftmost two digits)
     // Lower 24 bits = debug register [23:0]
     MSSD mssd_0 (
@@ -63,7 +63,7 @@ module Project_top (
         .AN      (AN)
     );
 
-    // ── RISC-V Single-Cycle Computer ─────────────────────────────────────
+    // RISC-V Single-Cycle Computer
     Single_Cycle_Computer my_computer (
         .clk              (CLK100MHZ),
         .rst              (rst),

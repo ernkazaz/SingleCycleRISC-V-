@@ -1,8 +1,6 @@
 `timescale 1ns / 1ps
 
 // Datapath for Single-Cycle RISC-V Processor
-// Fix vs original: replaced dangling SPI_MISO/SCLK/MOSI/SPI_CS ports
-// with ACL_* names that match MemorySystem and the top-level XDC.
 
 module Datapath(
     input  wire        clk, rst,
@@ -26,7 +24,7 @@ module Datapath(
     wire [31:0] RD1, RD2, ImmExt, SrcB;
     wire [31:0] ALUResult, ReadData, Result;
 
-    // ── PC logic ────────────────────────────────────────────────────────
+    // PC logic
     Mux_4to1 #(.WIDTH(32)) PCSrc_Mux (
         .select      (PCSrc),
         .input_0     (PCPlus4),
@@ -50,13 +48,13 @@ module Datapath(
         .OUT    (PCPlus4)
     );
 
-    // ── Instruction memory ───────────────────────────────────────────────
+    // Instruction memory 
     Instruction_memory #(.BYTE_SIZE(4), .ADDR_WIDTH(32)) Instr_mem (
         .ADDR (PC),
         .RD   (Instr)
     );
 
-    // ── Register file ────────────────────────────────────────────────────
+    // Register file 
     Register_file #(.WIDTH(32)) Reg_file (
         .clk                 (clk),
         .write_enable        (RegWrite),
@@ -71,21 +69,21 @@ module Datapath(
         .Debug_out           (Debug_out)
     );
 
-    // ── Immediate extension ──────────────────────────────────────────────
+    // Immediate extension
     Extend Extender (
         .Instr  (Instr[31:7]),
         .ImmSrc (ImmSrc),
         .ImmExt (ImmExt)
     );
 
-    // ── Branch / jump target ─────────────────────────────────────────────
+    // Branch / jump target
     Adder #(.WIDTH(32)) PCTarget_adder (
         .DATA_A (PC),
         .DATA_B (ImmExt),
         .OUT    (PCTarget)
     );
 
-    // ── ALU source mux ───────────────────────────────────────────────────
+    // ALU source mux
     Mux_2to1 #(.WIDTH(32)) SrcB_Mux (
         .select       (ALUSrc),
         .input_0      (RD2),
@@ -93,7 +91,7 @@ module Datapath(
         .output_value (SrcB)
     );
 
-    // ── ALU ──────────────────────────────────────────────────────────────
+    // ALU
     ALU Alu_inst (
         .A          (RD1),
         .B          (SrcB),
@@ -105,7 +103,7 @@ module Datapath(
         .Result     (ALUResult)
     );
 
-    // ── Memory system (RAM + SPI peripheral) ────────────────────────────
+    // Memory system (RAM + SPI peripheral)
     MemorySystem #(.DEPTH(256), .ADDR_WIDTH(32)) Mem_sys (
         .clk      (clk),
         .rst      (rst),
@@ -120,7 +118,7 @@ module Datapath(
         .ACL_CSN  (ACL_CSN)
     );
 
-    // ── Result mux ───────────────────────────────────────────────────────
+    // Result mux
     // ResultSrc: 00=ALUResult, 01=ReadData, 10=PCPlus4, 11=PCTarget (AUIPC)
     Mux_4to1 #(.WIDTH(32)) Result_Mux (
         .select       (ResultSrc),

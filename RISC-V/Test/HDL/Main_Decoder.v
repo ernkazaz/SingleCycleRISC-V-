@@ -7,7 +7,7 @@ module Main_Decoder(
     output wire [1:0] ResultSrc,
     output wire       Branch,
     output wire [1:0] ALUOp,
-    output wire [1:0] Jump      // Expanded to 2 bits to differentiate JAL and JALR
+    output wire [1:0] Jump    // Expanded to 2 bits to differentiate JAL and JALR
 );
 
     reg [12:0] control_signals; // Expanded to 13 bits to fit the new Jump signal
@@ -15,7 +15,6 @@ module Main_Decoder(
     always @(*) begin
         case(op)
             // Format: RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump(2 bits)
-            // Bit sizes: 1 _ 3 _ 1 _ 1 _ 2 _ 1 _ 2 _ 2 = 13 bits total
 
             7'b0110011: control_signals = 13'b1_000_0_0_00_0_10_00; // R-type
             7'b0010011: control_signals = 13'b1_000_1_0_00_0_10_00; // I-type ALU

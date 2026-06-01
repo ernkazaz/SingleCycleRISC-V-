@@ -14,13 +14,13 @@ module MemorySystem #(
     output wire        ACL_CSN
 );
 
-    // ── Address decode ───────────────────────────────────────────────────
+    // Address decode
     // SPI peripheral occupies 0x400-0x40F (16 bytes)
     wire spi_sel = (ADDR[31:4] == 28'h0000040);   // ADDR[31:4] == 0x0000040
     wire ram_we  = WE & ~spi_sel;
     wire spi_we  = WE &  spi_sel;
 
-    // ── Data RAM ─────────────────────────────────────────────────────────
+    // Data RAM
     wire [31:0] ram_rd;
     Memory #(.DEPTH(DEPTH), .ADDR_WIDTH(ADDR_WIDTH)) Data_mem (
         .clk    (clk),
@@ -31,13 +31,13 @@ module MemorySystem #(
         .RD     (ram_rd)
     );
 
-    // ── SPI peripheral ───────────────────────────────────────────────────
+    // SPI peripheral
     wire [31:0] spi_rd;
     SPI_Peripheral spi (
         .clk      (clk),
         .rst      (rst),
         .we       (spi_we),
-        .addr     (ADDR[3:0]),   // 4-bit offset covers 0x0..0xF
+        .addr     (ADDR[3:0]),   // 4-bit offset
         .wdata    (WD),
         .rdata    (spi_rd),
         .ACL_SCLK (ACL_SCLK),
@@ -46,7 +46,7 @@ module MemorySystem #(
         .ACL_CSN  (ACL_CSN)
     );
 
-    // ── ReadData mux ─────────────────────────────────────────────────────
+    // ReadData mux
     assign RD = spi_sel ? spi_rd : ram_rd;
 
 endmodule

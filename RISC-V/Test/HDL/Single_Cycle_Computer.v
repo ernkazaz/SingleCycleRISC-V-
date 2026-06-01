@@ -1,8 +1,6 @@
 `timescale 1ns / 1ps
 
 // Single_Cycle_Computer
-// Wires the Controller and Datapath together for the RISC-V processor.
-// SPI ACL pins are exposed so the top module can route them to FPGA pins.
 
 module Single_Cycle_Computer (
     input  wire        clk,
@@ -18,13 +16,13 @@ module Single_Cycle_Computer (
     output wire        ACL_CSN
 );
 
-    // ── Instruction fields (Datapath → Controller) ───────────────────────
+    // Instruction fields (Datapath → Controller)
     wire [31:0] Instr;
 
-    // ── ALU flags (Datapath → Controller) ────────────────────────────────
+    // ALU flags (Datapath → Controller)
     wire Zero, Negative, Carry, Overflow;
 
-    // ── Control signals (Controller → Datapath) ──────────────────────────
+    // Control signals (Controller → Datapath)
     wire [1:0]  PCSrc;
     wire [1:0]  ResultSrc;
     wire        MemWrite;
@@ -33,7 +31,7 @@ module Single_Cycle_Computer (
     wire        RegWrite;
     wire [3:0]  ALUControl;
 
-    // ── Controller ────────────────────────────────────────────────────────
+    // Controller
     Controller my_controller (
         .Instr      (Instr),
         .Zero       (Zero),
@@ -49,7 +47,7 @@ module Single_Cycle_Computer (
         .ALUControl (ALUControl)
     );
 
-    // ── Datapath ──────────────────────────────────────────────────────────
+    // Datapath
     Datapath my_datapath (
         .clk                  (clk),
         .rst                  (rst),
